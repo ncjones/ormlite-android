@@ -137,9 +137,20 @@ public class AndroidDatabaseConnection implements DatabaseConnection {
 	public CompiledStatement compileStatement(String statement, StatementType type, FieldType[] argFieldTypes,
 			int resultFlags) {
 		// resultFlags argument is not used in Android-land since the {@link Cursor} is bi-directional.
-		CompiledStatement stmt = new AndroidCompiledStatement(statement, db, type);
+		CompiledStatement stmt = createCompiledStatement(statement, type);
 		logger.trace("{}: compiled statement got {}: {}", this, stmt, statement);
 		return stmt;
+	}
+
+	private AndroidCompiledStatement createCompiledStatement(String statement, StatementType type) {
+		if (queryCancellationAvailable()) {
+			return new AndroidCancellableCompiledStatement(statement, db, type);
+		}
+		return new AndroidCompiledStatement(statement, db, type);
+	}
+
+	private static boolean queryCancellationAvailable() {
+		return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN;
 	}
 
 	public int insert(String statement, Object[] args, FieldType[] argFieldTypes, GeneratedKeyHolder keyHolder)

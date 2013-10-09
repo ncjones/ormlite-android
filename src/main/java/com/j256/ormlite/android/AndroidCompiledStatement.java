@@ -159,7 +159,7 @@ public class AndroidCompiledStatement implements CompiledStatement {
 				} else {
 					finalSql = sql + " " + max;
 				}
-				cursor = db.rawQuery(finalSql, getStringArray());
+				cursor = rawQuery(db, finalSql, getStringArray());
 				cursor.moveToFirst();
 				logger.trace("{}: started rawQuery cursor for: {}", this, finalSql);
 			} catch (android.database.SQLException e) {
@@ -168,6 +168,10 @@ public class AndroidCompiledStatement implements CompiledStatement {
 		}
 
 		return cursor;
+	}
+	
+	protected Cursor rawQuery(SQLiteDatabase db, String sql, String[] args) {
+		return db.rawQuery(sql, args);
 	}
 
 	@Override
@@ -224,5 +228,9 @@ public class AndroidCompiledStatement implements CompiledStatement {
 			// we assume we have Strings in args
 			return args.toArray(new String[args.size()]);
 		}
+	}
+
+	public void cancelQuery() {
+		throw new UnsupportedOperationException("Cancellation requires Android API level 16");
 	}
 }
